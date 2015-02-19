@@ -66,6 +66,6 @@ if __name__ == '__main__':
     arg=parser.parse_args()
 
     if arg.output:
-        fig.savefig('Distance_to_Screen.pdf')
+        fig.savefig('figs/Distance_to_Screen.pdf')
     
     plt.show()

@@ -24,5 +24,11 @@ def ap_fr_mag(N,m):
 # ====================================
 # Full counts function
 # ====================================
-def counts(rho,se,N,mag,px_length,QE):
-    return rho*se*ap_fr_mag(N,mag)*np.power(px_length/mag,2)*QE
+def counts(sigma,SE,N,mag,px_length,QE):
+    beam_density            = sigma
+    scintillator_efficiency = SE
+    aperture_fraction       = ap_fr_mag(N,mag)
+    area_mapping            = np.power(px_length/mag,2.0)
+    lens_fraction           = aperture_fraction*area_mapping
+    camera_fraction         = QE
+    return beam_density*scintillator_efficiency*lens_fraction*camera_fraction
