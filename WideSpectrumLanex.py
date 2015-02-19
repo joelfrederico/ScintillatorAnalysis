@@ -3,20 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import mytools as mt
-
-# ====================================
-# Close all plots (for iPython)
-# ====================================
-plt.close('all')
-
-# ====================================
-# Define magnification and object
-# ====================================
-def mag(h_img,h_obj):
-    return h_img/h_obj
-
-def obj(f,m):
-    return (1.0-1.0/m)*f
+import argparse
+from common_functions import *
 
 # ====================================
 # Define FOV for GigE and Hamamatsu
@@ -30,40 +18,6 @@ h_img_Ham = -13e-3
 # ====================================
 m_GigE = mag(h_img_GigE,h_obj)
 m_Ham  = mag(h_img_Ham,h_obj)
-
-print m_GigE
-
-# ====================================
-# Get object distance as a
-# fxn of focal length
-# ====================================
-f_cont = np.linspace(10,85,100)*1e-3
-o_cont_GigE = obj(f_cont,m_GigE)
-o_cont_Ham = obj(f_cont,m_Ham)
-
-f_list = np.array([20,24,28,35,50,60,85])*1e-3
-o_list_GigE = obj(f_list,m_GigE)
-o_list_Ham = obj(f_list,m_Ham)
-
-# ====================================
-# Plot results
-# ====================================
-fig = plt.figure()
-gs = gridspec.GridSpec(1,1)
-ax = fig.add_subplot(gs[0,0])
-plt1 = ax.plot(f_cont/1e-3,o_cont_GigE,'b-',label='_GigE')
-plt2 = ax.plot(f_list/1e-3,o_list_GigE,'b-o',label='GigE')
-
-plt3 = ax.plot(f_cont/1e-3,o_cont_Ham,'r-',label='_Ham')
-plt4 = ax.plot(f_list/1e-3,o_list_Ham,'r-o',label='Hamamatsu')
-
-mt.addlabel(axes=ax,xlabel='Focal Length [mm]',ylabel='Object distance [m]',toplabel='Distance to Screen')
-
-gs.tight_layout(fig)
-
-ax.legend(loc=0)
-
-#  fig.savefig('GigE_Distance_to_Screen.pdf')
 
 # ====================================
 # Beam information
@@ -91,24 +45,6 @@ QE_Ham = 0.6
 counts_max_Ham = 30e3
 
 px_length = 6.5e-6
-
-# ====================================
-# Aperture function
-# ====================================
-# aperture fraction
-def ap_fr(f,N,o):
-    lens_area = np.pi*np.power(f/(2.0*N),2.0)
-    sphere_area = 4*np.pi*np.power(o,2)
-    return lens_area/sphere_area
-
-def ap_fr_mag(N,m):
-    return np.power(m/((m-1.0)*4*N),2)
-
-# ====================================
-# Full counts function
-# ====================================
-def counts(rho,se,N,mag,px_length,QE):
-    return rho*se*ap_fr_mag(N,mag)*np.power(px_length/mag,2)*QE
 
 # ====================================
 # Simplified counts function
@@ -150,12 +86,13 @@ count_frac_m1 = plot_counts(N,m_1,rho)
 count_frac_30cm = plot_counts(N,m_Ham,rho)
 
 fig=plt.figure()
+gs = gridspec.GridSpec(1,1)
 ax=fig.add_subplot(gs[0,0])
-
-plt100=ax.loglog(rho_C_per_mm2,count_frac_m1,label='1:1 Magnification (ELANEX?)')
-plt24=ax.loglog(rho_C_per_mm2,count_frac_30cm,label='30-cm FOV')
-plt_Ham_max=ax.loglog(rho_C_per_mm2,np.ones(rho.size),label='Hamamatsu Saturation Level')
-plt_Ham_noise=ax.loglog(rho_C_per_mm2,np.ones(rho.size)*40/np.power(2,16),'orange',label='Hamamatsu Noise Level')
+linewidth = 2
+plt100=ax.loglog(rho_C_per_mm2,count_frac_m1,label='1:1 Magnification (ELANEX?)',linewidth=linewidth)
+plt24=ax.loglog(rho_C_per_mm2,count_frac_30cm,label='30-cm FOV',linewidth=linewidth)
+plt_Ham_max=ax.loglog(rho_C_per_mm2,np.ones(rho.size),label='Hamamatsu Saturation Level',linewidth=linewidth)
+plt_Ham_noise=ax.loglog(rho_C_per_mm2,np.ones(rho.size)*40/np.power(2,16),'orange',label='Hamamatsu Noise Level',linewidth=linewidth)
 
 counts_peak_m_1 = plot_counts(N,m_1,rho_peak)
 counts_peak_30cm = plot_counts(N,m_Ham,rho_peak)
@@ -197,7 +134,8 @@ ax.annotate(
         )
 
 
-ax.grid(True,which='Both')
+ax.grid(which='Both',color='0.7',linestyle='-')
+ax.set_axisbelow(True)
 ax.legend(loc=0,framealpha=0.75)
 
 mt.addlabel(axes=ax,xlabel='Beam density [C/mm^2]',ylabel='Fractional Well Fill Level',toplabel='Hamamatsu Fraction of Well Depth in a Single Pixel')
@@ -212,7 +150,16 @@ mt.addlabel(axes=ax2,ylabel='Counts')
 
 gs.tight_layout(fig)
 
-print 'Counts for {:0.2e} pC/mm^2: {:0.2f} counts'.format(rho_low_pC_per_mm2, counts_low_cam) 
+if __name__ == '__main__':
+    parser=argparse.ArgumentParser(description='Creates a plot of object length vs. focal length.')
+    parser.add_argument('-v','--verbose',action='store_true',
+            help='enable verbose mode')
+    parser.add_argument('-o','--output',action='store_true',
+            help='save file')
 
-fig.savefig('Hamamatsu_Fraction.pdf')
-plt.show()
+    arg=parser.parse_args()
+
+    if arg.output:
+        fig.savefig('Hamamatsu_Fraction.pdf')
+    
+    plt.show()
