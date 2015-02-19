@@ -14,7 +14,7 @@ def obj(f,m):
 # ====================================
 # aperture fraction
 def ap_fr(f,N,o):
-    lens_area = np.pi*np.power(f/(2.0*N),2.0)
+    lens_area   = np.pi*np.power(f/(2.0*N),2.0)
     sphere_area = 4.0*np.pi*np.power(o,2.0)
     return lens_area/sphere_area
 

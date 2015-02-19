@@ -28,20 +28,21 @@ m_Ham  = mag(h_img_Ham,h_obj)
 # Get object distance as a
 # fxn of focal length
 # ====================================
-f_cont = np.linspace(10,85,100)*1e-3
+f_cont      = np.linspace(10,85,100)*1e-3
 o_cont_GigE = obj(f_cont,m_GigE)
-o_cont_Ham = obj(f_cont,m_Ham)
+o_cont_Ham  = obj(f_cont,m_Ham)
 
-f_list = np.array([20,24,28,35,50,60,85])*1e-3
+f_list      = np.array([20,24,28,35,50,60,85])*1e-3
 o_list_GigE = obj(f_list,m_GigE)
-o_list_Ham = obj(f_list,m_Ham)
+o_list_Ham  = obj(f_list,m_Ham)
 
 # ====================================
 # Plot results
 # ====================================
 fig = plt.figure()
-gs = gridspec.GridSpec(1,1)
-ax = fig.add_subplot(gs[0,0])
+gs  = gridspec.GridSpec(1,1)
+ax  = fig.add_subplot(gs[0,0])
+
 plt1 = ax.plot(f_cont/1e-3,o_cont_GigE,'b-',label='_GigE')
 plt2 = ax.plot(f_list/1e-3,o_list_GigE,'b-o',label='GigE')
 

@@ -24,7 +24,7 @@ m_Ham  = mag(h_img_Ham,h_obj)
 # ====================================
 # Peak beam density
 # nC/mm^2
-rho_peak = 47e-9/np.power(1e-3,2)
+rho_peak           = 47e-9/np.power(1e-3,2)
 rho_peak_C_per_mm2 = rho_peak * 1e-6
 
 # ====================================
@@ -39,7 +39,7 @@ SE = 1.75e9/1e-12*4*np.pi
 # ====================================
 # GigE QE
 QE_GigE = 0.5
-QE_Ham = 0.6
+QE_Ham  = 0.6
 
 # Maximum counts, Hamamatsu
 counts_max_Ham = 30e3
@@ -85,51 +85,53 @@ count_frac_m1 = plot_counts(N,m_1,rho)
 
 count_frac_30cm = plot_counts(N,m_Ham,rho)
 
-fig=plt.figure()
-gs = gridspec.GridSpec(1,1)
-ax=fig.add_subplot(gs[0,0])
+fig = plt.figure()
+gs  = gridspec.GridSpec(1,1)
+ax  = fig.add_subplot(gs[0,0])
+
 linewidth = 2
-plt100=ax.loglog(rho_C_per_mm2,count_frac_m1,label='1:1 Magnification (ELANEX?)',linewidth=linewidth)
-plt24=ax.loglog(rho_C_per_mm2,count_frac_30cm,label='30-cm FOV',linewidth=linewidth)
-plt_Ham_max=ax.loglog(rho_C_per_mm2,np.ones(rho.size),label='Hamamatsu Saturation Level',linewidth=linewidth)
-plt_Ham_noise=ax.loglog(rho_C_per_mm2,np.ones(rho.size)*40/np.power(2,16),'orange',label='Hamamatsu Noise Level',linewidth=linewidth)
 
-counts_peak_m_1 = plot_counts(N,m_1,rho_peak)
-counts_peak_30cm = plot_counts(N,m_Ham,rho_peak)
-rho_low = 5e-4*1e-12/1e-6
-rho_low_C_per_mm2 = rho_low*1e-6
+plt100        = ax.loglog(rho_C_per_mm2,count_frac_m1,label='1:1 Magnification (ELANEX?)',linewidth=linewidth)
+plt24         = ax.loglog(rho_C_per_mm2,count_frac_30cm,label='30-cm FOV',linewidth=linewidth)
+plt_Ham_max   = ax.loglog(rho_C_per_mm2,np.ones(rho.size),label='Hamamatsu Saturation Level',linewidth=linewidth)
+plt_Ham_noise = ax.loglog(rho_C_per_mm2,np.ones(rho.size)*40/np.power(2,16),'orange',label='Hamamatsu Noise Level',linewidth=linewidth)
+
+counts_peak_m_1    = plot_counts(N,m_1,rho_peak)
+counts_peak_30cm   = plot_counts(N,m_Ham,rho_peak)
+rho_low            = 5e-4*1e-12/1e-6
+rho_low_C_per_mm2  = rho_low*1e-6
 rho_low_pC_per_mm2 = rho_low*1e-6*1e12
-counts_low = plot_counts(N,m_1,rho_low)
-counts_low_cam = counts_low*np.power(2,16)
+counts_low         = plot_counts(N,m_1,rho_low)
+counts_low_cam     = counts_low*np.power(2,16)
 
-plt_m1=ax.loglog(rho_peak_C_per_mm2,counts_peak_m_1,'bo',label='_Peak density, 1:1 mag')
-plt_30cm=ax.loglog(rho_peak_C_per_mm2,counts_peak_30cm,'go',label='_Peak density, 30-cm FOV')
-plt_30cm=ax.loglog(rho_low_C_per_mm2,counts_low,'bo',label='_Single count density')
+plt_m1   = ax.loglog(rho_peak_C_per_mm2,counts_peak_m_1,'bo',label='_Peak density, 1:1 mag')
+plt_30cm = ax.loglog(rho_peak_C_per_mm2,counts_peak_30cm,'go',label='_Peak density, 30-cm FOV')
+plt_30cm = ax.loglog(rho_low_C_per_mm2,counts_low,'bo',label='_Single count density')
 
 ax.annotate(
-        s='Peak density, 30-cm FOV',
-        xy=(rho_peak_C_per_mm2,counts_peak_30cm),
-        xytext = (0,15),
+        s          = 'Peak density, 30-cm FOV',
+        xy         = (rho_peak_C_per_mm2,counts_peak_30cm),
+        xytext     = (0,15),
         textcoords = 'offset points', ha = 'right', va = 'bottom',
-        bbox = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
+        bbox       = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
         arrowprops = dict(relpos=(0.5,-0.3),arrowstyle='-',connectionstyle='arc3,rad=0.15',mutation_scale = 20,color='k')
         )
 
 ax.annotate(
-        s='Peak density, 1:1 mag.',
-        xy=(rho_peak_C_per_mm2,counts_peak_m_1),
-        xytext = (0,-130),
+        s          = 'Peak density, 1:1 mag.',
+        xy         = (rho_peak_C_per_mm2,counts_peak_m_1),
+        xytext     = (0,-130),
         textcoords = 'offset points', ha = 'right', va = 'bottom',
-        bbox = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
+        bbox       = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
         arrowprops = dict(relpos=(0.5,1.3),arrowstyle='-',connectionstyle='arc3,rad=0.15',mutation_scale = 20,color='k')
         )
 
 ax.annotate(
-        s=r'$\rho=$5$\times$10$^{{-4}}$ pC/mm$^2$ = {:0.2f} counts'.format(counts_low_cam),
-        xy=(rho_low_C_per_mm2,counts_low),
-        xytext = (40,0),
+        s          = r'$\rho=$5$\times$10$^{{-4}}$ pC/mm$^2$ = {:0.2f} counts'.format(counts_low_cam),
+        xy         = (rho_low_C_per_mm2,counts_low),
+        xytext     = (40,0),
         textcoords = 'offset points', ha = 'left', va = 'top',
-        bbox = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
+        bbox       = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
         arrowprops = dict(relpos=(0,0.5),arrowstyle='-',connectionstyle='arc3,rad=-0.15',mutation_scale = 20,color='k')
         )
 
