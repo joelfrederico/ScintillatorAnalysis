@@ -180,7 +180,7 @@ gs.tight_layout(fig)
 # ====================================
 # Calculate region
 # ====================================
-res = 200
+res = 1000
 N_vector = np.linspace(np.sqrt(2),4,res)
 FOV_vector = np.linspace(5e-2,40e-2,res)
 FOV_vector_cm = FOV_vector * 1e2
@@ -214,7 +214,8 @@ ax01.set_xlim(xlims)
 #  mt.addlabel(axes=ax01,xlabel='F-number',
 #          ylabel='Field of View'
 #          )
-fig2.colorbar(plt01)
+cb=fig2.colorbar(plt01)
+mt.addlabel(cb=cb,clabel='Normalized Counts')
 
 linewidth=1
 
@@ -225,7 +226,7 @@ ax00 = fig2.add_subplot(gs[0,0])
 
 rel_f28 = performance(N=np.sqrt(8),FOV=FOV_vector_cm)
 ax00.plot(rel_f28/norm_factor,FOV_cm,'b',linewidth=linewidth)
-mt.addlabel(axes=ax00,xlabel='Normalized Count Magnitude',ylabel='Field of View [cm]')
+mt.addlabel(axes=ax00,xlabel='Normalized Counts',ylabel='Field of View [cm]')
 ax00.set_xlim((0,0.3))
 ax00.invert_xaxis()
 #  ax00.grid(which='Both',color='0.7',linestyle='-')
@@ -242,13 +243,36 @@ rel_list = performance(N=N_list,FOV=30e-2)
 
 ax11.plot(N_vector,rel_30cm/norm_factor,'b',N_list,rel_list/norm_factor,'bo',linewidth=linewidth)
 ax11.set_xlim(xlims)
-mt.addlabel(axes=ax11,ylabel='Normalized Count Magnitude',xlabel='Aperture f-number')
+mt.addlabel(axes=ax11,ylabel='Normalized Counts',xlabel='Aperture f-number')
 
 layout_rect = [0,0,1,0.95]
 fig2.suptitle('Normalized Light Performance due to Magnification, F-number',fontsize=14,weight='bold')
 gs.tight_layout(fig2,rect=layout_rect)
 
 rel_list = rel_list/np.max(rel_list)
+
+# ====================================
+# DOF
+# ====================================
+def hyperfocal(f,N,c):
+    return np.power(f,2)/(N*c)+f
+
+def DOF(f,N,c,m):
+    return 2.0*N*c*(m+1) / (np.power(m,2)-np.power(N*c/f,2))
+
+c=px_length
+N_vector = np.linspace(1.4,4,100)
+f_vector = np.linspace(20e-3,50e-3,100)
+
+NN, ff = np.meshgrid(N_vector,f_vector)
+
+dof_vector = DOF(ff,NN,c,m_Ham)
+
+fig3 = plt.figure()
+gs = gridspec.GridSpec(1,1)
+axD = fig3.add_subplot(gs[0,0])
+
+plt1 = axD.pcolormesh(NN,ff,dof_vector,cmap='Blues_r')
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser(description='Creates a plot of object length vs. focal length.')
