@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
-import slactrac as sltr
-import numpy as np
-import os
 import ElegantPy
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
+import mytools as mt
+import numpy as np
+import os
+import slactrac as sltr
+
+# ======================================
+# Start logger
+# ======================================
+#  logger = mt.mylogger(filename='worksheet')
 
 # ======================================
 # Define beamline
@@ -91,7 +97,7 @@ path,root,ext = sltr.elegant_sim(
         n_particles_per_bunch = 5e5                   ,
         sigma_dp              = 0.2                   ,
         dir                   = dir_elegant           ,
-        filename              = 'out.ele'
+        filename              = os.path.join(dir_elegant,'out.ele')
         )
 
 ele_path = os.path.join(path,root+ext)
@@ -99,67 +105,25 @@ ele_path = os.path.join(path,root+ext)
 ESim = ElegantPy.ElegantSim(ele_path)
 
 # ======================================
-# Rotation matrix
+# Create plots
 # ======================================
-
-theta = np.pi/2
-phi   = np.pi/2
-psi   = 0
-
-c_theta = np.cos(theta)
-c_phi   = np.cos(phi)
-c_psi   = np.cos(psi)
-
-s_theta = np.sin(theta)
-s_phi   = np.sin(phi)
-s_psi   = np.sin(psi)
-
-R = np.zeros((3,3))
-R[0,0] = c_theta*c_psi
-R[0,1] = c_phi*s_psi + s_phi*s_theta*c_psi
-R[0,2] = s_phi*s_psi - c_phi*s_theta*c_psi
-R[1,0] = -c_theta*s_psi
-R[1,1] = c_phi*c_psi - s_phi*s_theta*s_psi
-R[1,2] = s_phi*c_psi + c_phi*s_theta*s_psi
-R[2,0] = s_theta
-R[2,1] = -s_phi*c_theta
-R[2,2] = c_phi*c_theta
-
-# ======================================
-# Generate tons of histograms
-# ======================================
-
-# ds = 0.002
+# fig = plt.figure(figsize=(8*3,6))
+# gs = gridspec.GridSpec(1,3)
 # 
-# gs = gridspec.GridSpec(1,1)
-# xmin = -0.002
-# xmax = 0.002
-# xrange = xmax-xmin
-# ymin = -0.1
-# ymax = 0.05
-# yrange = ymax-ymin
+# ele_bunch = ESim.Bunch
 # 
-# for i in range(0,2001):
-#     s     = np.float(-1) + (i*ds)
-#     titlestr = '{:01.3f} meters'.format(s)
-#     print titlestr
-#     x_new = ESim.Bunch.x + ESim.Bunch.xp * s
-#     y_new = ESim.Bunch.y + ESim.Bunch.yp * s
+# bool_x = (np.abs(ele_bunch.x) < 0.01)
+# bool_y = (ele_bunch.y > -0.041)
+# bool = np.logical_and(bool_x,bool_y)
+# ax = fig.add_subplot(gs[0,0])
+# ax.hist2d(ele_bunch.x[bool],ele_bunch.y[bool],bins=200)
 # 
-#     x_ind = np.logical_and(x_new > xmin, x_new < xmax)
-#     y_ind = np.logical_and(y_new > ymin, y_new < ymax)
-#     ind   = np.logical_and(x_ind,y_ind)
+# ax2 = fig.add_subplot(gs[0,1])
+# ax2.hist2d(ele_bunch.x[bool],ele_bunch.delta[bool],bins=200)
 # 
-#     fig = plt.figure(figsize=(2,7.5))
-#     ax  = fig.add_subplot(gs[0,0])
-#     ax.hist2d(x_new[ind],y_new[ind],bins=500,range=[[xmin,xmax],[ymin,ymax]])
+# ax3 = fig.add_subplot(gs[0,2])
+# ax3.hist(ele_bunch.delta,bins=100)
 # 
-#     gs.tight_layout(fig)
-#     ax.set_title(titlestr)
+# gs.tight_layout(fig)
 # 
-#     fig.savefig('{:04d}.png'.format(i))
-#     plt.close(fig)
-
-# ======================================
-# 
-# ======================================
+# plt.show()
