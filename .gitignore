@@ -2,3 +2,5 @@
 *.pdf
 *.pyc
 figs
+temp
+*.log
