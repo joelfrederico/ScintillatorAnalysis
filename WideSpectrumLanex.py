@@ -6,6 +6,7 @@ import mytools as mt
 import argparse
 from common_functions import *
 import shlex,subprocess
+import scipy as sp
 
 plt.close('all')
 
@@ -21,6 +22,7 @@ h_img_Ham = -13e-3
 # ====================================
 m_GigE = mag(h_img_GigE,h_obj)
 m_Ham  = mag(h_img_Ham,h_obj)
+m_Ham = 0.03990413185798549
 
 # ====================================
 # Beam information
@@ -86,8 +88,8 @@ count_frac_m1 = plot_counts(N,m_1,sigma)
 # 30cm FOV Analysis
 # ====================================
 #  f = 100e-3
-
-count_frac_30cm = plot_counts(N,m_Ham,sigma)
+N_30cm = np.sqrt(2.0)
+count_frac_30cm = plot_counts(N_30cm,m_Ham,sigma)
 
 # ====================================
 # Create axis
@@ -105,7 +107,7 @@ linewidth = 2
 # Plot lines
 # ====================================
 plt100        = ax.loglog(sigma_C_per_mm2,count_frac_m1,label='Current ELANEX (m={:0.3f})'.format(m_1),linewidth=linewidth)
-plt24         = ax.loglog(sigma_C_per_mm2,count_frac_30cm,label='30-cm FOV (m={:0.3f})'.format(m_Ham),linewidth=linewidth)
+plt24         = ax.loglog(sigma_C_per_mm2,count_frac_30cm,label='Current WLANEX (m={:0.3f})'.format(m_Ham),linewidth=linewidth)
 plt_Ham_max   = ax.loglog(sigma_C_per_mm2,np.ones(sigma.size),label='Hamamatsu Saturation Level',linewidth=linewidth)
 plt_Ham_noise = ax.loglog(sigma_C_per_mm2,np.ones(sigma.size)*40/np.power(2,16),'orange',label='Hamamatsu Noise Level',linewidth=linewidth)
 
@@ -113,39 +115,54 @@ plt_Ham_noise = ax.loglog(sigma_C_per_mm2,np.ones(sigma.size)*40/np.power(2,16),
 # Calculate points of interest
 # ====================================
 counts_peak_m_1    = plot_counts(N,m_1,sigma_peak)
-counts_peak_30cm   = plot_counts(N,m_Ham,sigma_peak)
+counts_peak_30cm   = plot_counts(N_30cm,m_Ham,sigma_peak)
 sigma_low            = 5e-4*1e-12/1e-6
 sigma_low_C_per_mm2  = sigma_low*1e-6
-sigma_low_pC_per_mm2 = sigma_low*1e-6*1e12
 counts_low         = plot_counts(N,m_1,sigma_low)
 counts_low_cam     = counts_low*np.power(2,16)
+
+sigma_guess = 1e-11/1e-6
+sat_opt = sp.optimize.minimize(lambda x:np.power(plot_counts(N=N_30cm,m_Ham=m_Ham,sigma=x*sigma_guess)-1.0,2),x0=1)
+sigma_sat = sigma_guess*sat_opt.x[0]
+sigma_sat_C_per_mm2 = sigma_sat*1e-6
+counts_sat = plot_counts(N=N_30cm,m_Ham=m_Ham,sigma=sigma_sat)
 
 # ====================================
 # Add points of interest
 # ====================================
-plt_m1   = ax.loglog(sigma_peak_C_per_mm2,counts_peak_m_1,'bo',label='_Peak density, 1:1 mag')
-plt_30cm = ax.loglog(sigma_peak_C_per_mm2,counts_peak_30cm,'go',label='_Peak density, 30-cm FOV')
-plt_30cm = ax.loglog(sigma_low_C_per_mm2,counts_low,'bo',label='_Single count density')
+plt_m1     = ax.loglog(sigma_peak_C_per_mm2,counts_peak_m_1,'bo',label='_Peak density, 1:1 mag')
+plt_30cm   = ax.loglog(sigma_peak_C_per_mm2,counts_peak_30cm,'go',label='_Peak density, 30-cm FOV')
+plt_single = ax.loglog(sigma_low_C_per_mm2,counts_low,'bo',label='_Single count density')
+plt_sat    = ax.loglog(sigma_sat_C_per_mm2,counts_sat,'ro',label='_Saturated')
 
 # ====================================
 # Annotate points of interest
 # ====================================
 ax.annotate(
-        s          = 'Peak density, 30-cm FOV',
+        s          = 'Peak density,\n30-cm FOV',
         xy         = (sigma_peak_C_per_mm2,counts_peak_30cm),
-        xytext     = (0,15),
-        textcoords = 'offset points', ha = 'right', va = 'bottom',
+        xytext     = (-100,-10),
+        textcoords = 'offset points', ha = 'center', va = 'center',
         bbox       = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
-        arrowprops = dict(relpos=(0.5,-0.3),arrowstyle='-',connectionstyle='arc3,rad=0.15',mutation_scale = 20,color='k')
+        arrowprops = dict(relpos=(1.05,0.5),arrowstyle='-',connectionstyle='arc3,rad=0.15',mutation_scale = 20,color='k')
         )
 
 ax.annotate(
-        s          = 'Peak density, 1:1 mag.',
+        s          = 'Peak density,\n1:1 mag.',
         xy         = (sigma_peak_C_per_mm2,counts_peak_m_1),
-        xytext     = (0,-130),
-        textcoords = 'offset points', ha = 'right', va = 'bottom',
+        xytext     = (-45,-80),
+        textcoords = 'offset points', ha = 'center', va = 'center',
         bbox       = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
-        arrowprops = dict(relpos=(0.5,1.3),arrowstyle='-',connectionstyle='arc3,rad=0.15',mutation_scale = 20,color='k')
+        arrowprops = dict(relpos=(0.5,1.2),arrowstyle='-',connectionstyle='arc3,rad=0.15',mutation_scale = 20,color='k')
+        )
+
+ax.annotate(
+        s          = r'Saturation {:0.2f} pC/mm$^2$'.format(sigma_sat_C_per_mm2*1e12),
+        xy         = (sigma_sat_C_per_mm2,counts_sat),
+        xytext     = (-100,30),
+        textcoords = 'offset points', ha = 'center', va = 'center',
+        bbox       = dict(boxstyle='round,pad=0.5',fc='white',alpha=0.75),
+        arrowprops = dict(relpos=(1.03,0.5),arrowstyle='-',connectionstyle='arc3,rad=-0.15',mutation_scale = 20,color='k')
         )
 
 ax.annotate(
@@ -268,22 +285,22 @@ NN, ff = np.meshgrid(N_vector,f_vector)
 
 dof_vector = DOF(ff,NN,c,m_Ham)
 
-fig3 = plt.figure()
-gs = gridspec.GridSpec(1,1)
-axD = fig3.add_subplot(gs[0,0])
-
-plt1 = axD.pcolormesh(NN,ff,dof_vector,cmap='Blues_r')
+# fig3 = plt.figure()
+# gs = gridspec.GridSpec(1,1)
+# axD = fig3.add_subplot(gs[0,0])
+# 
+# plt1 = axD.pcolormesh(NN,ff,dof_vector,cmap='Blues_r')
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser(description='Creates a plot of object length vs. focal length.')
     parser.add_argument('-v','--verbose',action='store_true',
             help='enable verbose mode')
-    parser.add_argument('-o','--output',action='store_true',
+    parser.add_argument('-s','--save',action='store_true',
             help='save file')
 
     arg=parser.parse_args()
 
-    if arg.output:
+    if arg.save:
         fig.savefig('figs/Hamamatsu_Fraction.pdf')
         fig2.savefig('figs/Lens_Light_Performance.tiff')
         command = 'open figs'
