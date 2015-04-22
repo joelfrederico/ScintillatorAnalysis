@@ -8,8 +8,19 @@ def mag(h_img, h_obj):
     return h_img/h_obj
 
 
-def obj(f, m):
-    return (1.0-1.0/m)*f
+def obj(f=None, m=None, i=None):
+    if m is not None and f is not None:
+        return (1.0-1.0/m)*f
+    elif f is not None and i is not None:
+        return f*i/(i-f)
+
+
+def img(f=None, o=None):
+    return f*o/(o-f)
+
+
+def h_obj(h_img=None, o=None, f=None):
+    return -h_img * o / img(f=f, o=o)
 
 
 # ====================================
